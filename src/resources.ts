@@ -82,16 +82,16 @@ export class ResourceService {
                 let axios = require('axios').default;
                 var permission = "";
                 switch(action) {
-                    case 'get':
+                    case 'GET':
                         permission = resource_permissions.get;
                         break;
-                    case 'create':
+                    case 'CREATE':
                         permission = resource_permissions.create;
                         break;
-                    case 'update':
+                    case 'UPDATE':
                         permission = resource_permissions.update;
                         break;
-                    case 'delete':
+                    case 'DELETE':
                         permission = resource_permissions.delete;
                         break;
                 }
