@@ -4,7 +4,6 @@ import { MongoRouter } from 'rest-mongoose';
 import { urlencoded, json } from 'body-parser';
 import { Types, connect, SchemaDefinition } from 'mongoose';
 import { Auth } from 'rest-mongoose';
-import e from 'express';
 
 var cors = require('cors');
 
@@ -100,7 +99,7 @@ export class ResourceService {
                     return false;
                 }
                 let response = await axios({
-                    method: 'get',
+                    method: 'post',
                     url: `${identity}/check_permission`,
                     headers: {'access-token': token},
                     data: {permission: permission}
