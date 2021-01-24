@@ -54,11 +54,21 @@ export class ResourceService {
                     unique: true,
                     required: true
                 },
-                data: {
+                str_shema: {
                     type: String,
                     unique: false,
                     required: true
-                }
+                },
+                timestamps: {
+                    type: Boolean,
+                    unique: false,
+                    required: true
+                },
+                free_actions: [{
+                    type: String,
+                    unique: false,
+                    required: false
+                }]
             },
             true
         );
@@ -71,9 +81,9 @@ export class ResourceService {
         var corsOptions = {
             origin: function (origin: any, callback: any) {
                 if (cors_white_list.includes(origin)) {
-                callback(null, true);
+                    callback(null, true);
                 } else {
-                callback(new Error(`Origin ${origin} is not allowed by CORS`));
+                    callback(new Error(`Origin ${origin} is not allowed by CORS`));
                 }
             }
         }
@@ -124,19 +134,23 @@ export class ResourceService {
 
         this._resources_model.model.find().then(function (resources: any) {
             for(let res of resources) {
-                let data = JSON.parse(res.data);
-                res_serv.add_resource(
-                    res.name,
-                    data.shema,
-                    data.timestamps,
-                    data.free_actions
-                ).then((ok: any) => {
-                    if(!ok) {
-                        console.log("Error adding resource");
-                    }
-                }).catch((err: any) => {
-                    console.log(`Error adding resource: ${err}`);
-                });
+                try {
+                    let shema = JSON.parse(res.str_shema);
+                    res_serv.add_resource(
+                        res.name,
+                        shema,
+                        res.timestamps,
+                        res.free_actions
+                    ).then((ok: any) => {
+                        if(!ok) {
+                            console.log("Error adding resource");
+                        }
+                    }).catch((err: any) => {
+                        console.log(`Error adding resource: ${err}`);
+                    });
+                } catch {
+                    console.log(`Bad shema string ${res.str_shema}`);
+                }
             }
         });
 
@@ -265,10 +279,13 @@ export class ResourceService {
 
         for(let res of this._resources) {
             if(res.title == title) {
-                res.model.model.deleteMany({});
+                res.model.model.deleteMany({}, function(err: any) {
+                    if(err) {
+                        console.log(`Error deleting ${res.title}s: ${err}`);
+                    }
+                });
             }
         }
-        console.log(this._app.routes.get);
 
         return true;
     }
@@ -285,20 +302,22 @@ export class ResourceService {
 
         if(this._resources_router) {
             this._resources_router.route(function(action: string, data: any) {
-                let _data = JSON.parse(data.data);
                 switch (action) {
                     case "CREATE":
+                        let shema = JSON.parse(data.str_shema);
                         res_serv.add_resource(
                             data.name,
-                            _data.shema,
-                            _data.timestamps,
-                            _data.free_actions
+                            shema,
+                            data.timestamps,
+                            data.free_actions
                         );
                         break;
                     case "DELETE":
                         res_serv.remove_resource(data.name);
                 }
             });
+        } else {
+            console.log("Null resources router.");
         }
     }
 
