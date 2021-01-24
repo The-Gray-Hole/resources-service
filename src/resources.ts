@@ -21,7 +21,7 @@ interface Resource {
     auth: Auth
 }
 
-export class ResourceService {
+export class ResourcesService {
     private _resources: Array<Resource> = [];
 
     private _app: any;
@@ -47,7 +47,7 @@ export class ResourceService {
         this._port = port || 8000;
 
         this._resources_model = new MongoModel(
-            "_resources",
+            "_resource",
             {
                 name: {
                     type: String,
@@ -157,6 +157,43 @@ export class ResourceService {
         return true;
     }
 
+    public route() {
+        var res_serv = this;
+
+        this._app.get('/', (request: any, response: any) => {
+            request;
+            response.json({
+                "message": `Welcome to test ${this._app_name}.`
+            });
+        });
+
+        if(this._resources_router) {
+            this._resources_router.route(function(action: string, data: any) {
+                switch (action) {
+                    case "CREATE":
+                        let shema = JSON.parse(data.str_shema);
+                        res_serv.add_resource(
+                            data.name,
+                            shema,
+                            data.timestamps,
+                            data.free_actions
+                        );
+                        break;
+                    case "DELETE":
+                        res_serv.remove_resource(data.name);
+                }
+            });
+        } else {
+            console.log("Null resources router.");
+        }
+    }
+
+    public start() {
+        this._app.listen(this._port, () => {
+            console.log(`Server is listening on port ${String(this._port)}`);
+        });
+    }
+
     public async add_resource(title: string,
                               shema: SchemaDefinition,
                               timestamps: boolean,
@@ -256,7 +293,7 @@ export class ResourceService {
                         permission = delete_perm_id;
                         break;
                 }
-                
+
                 return await res_serv.check_permission(token, permission);
             },
             free_actions || []
@@ -288,43 +325,6 @@ export class ResourceService {
         }
 
         return true;
-    }
-
-    public route() {
-        var res_serv = this;
-
-        this._app.get('/', (request: any, response: any) => {
-            request;
-            response.json({
-                "message": `Welcome to test ${this._app_name}.`
-            });
-        });
-
-        if(this._resources_router) {
-            this._resources_router.route(function(action: string, data: any) {
-                switch (action) {
-                    case "CREATE":
-                        let shema = JSON.parse(data.str_shema);
-                        res_serv.add_resource(
-                            data.name,
-                            shema,
-                            data.timestamps,
-                            data.free_actions
-                        );
-                        break;
-                    case "DELETE":
-                        res_serv.remove_resource(data.name);
-                }
-            });
-        } else {
-            console.log("Null resources router.");
-        }
-    }
-
-    public start() {
-        this._app.listen(this._port, () => {
-            console.log(`Server is listening on port ${String(this._port)}`);
-        });
     }
 
     public async get_permissions() {
