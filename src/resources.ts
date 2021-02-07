@@ -165,11 +165,12 @@ export class ResourcesService {
         this._resources_auth = new Auth(
             this._resources_model,
             async (token: string, action: string, instance_id: string) => {
-                return await check_permission(
+                let resp = await check_permission(
                     this._identity_url,
                     token,
                     resources_admin_perm
                 );
+                return resp.status == 200;
             },
             []
         );
