@@ -168,7 +168,7 @@ export class ResourcesService {
                 let resp = await check_permission(
                     this._identity_url,
                     token,
-                    resources_admin_perm
+                    RESOURCES_PERM
                 );
                 return resp.status == 200;
             },
