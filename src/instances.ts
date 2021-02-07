@@ -34,12 +34,15 @@ export async function add_resource
 )
 {
     var _shema = JSON.parse(shema);
+    console.log(_shema);
     _shema.__owner_uid = {
         type: String,
         unique: false,
         required: false
     },
+    console.log(_shema);
     _shema = _shema as SchemaDefinition;
+    console.log(_shema);
     var resource_model = new MongoModel(title, _shema, timestamps);
     var resource_ctl = new MongoController(resource_model, valid_actions);
 

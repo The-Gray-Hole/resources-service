@@ -207,8 +207,6 @@ export class ResourcesService {
     }
 
     public route() {
-        var res_serv = this;
-
         this._app.get('/', (request: any, response: any) => {
             request;
             response.json({
@@ -223,6 +221,7 @@ export class ResourcesService {
                         add_resource(
                             this._identity_url,
                             this._identity_token,
+                            this._app,
                             data.title,
                             data.str_shema,
                             data.timestamps,
