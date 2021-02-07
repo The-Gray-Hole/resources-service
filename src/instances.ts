@@ -34,13 +34,11 @@ export async function add_resource
 )
 {
     var _shema = JSON.parse(shema);
-    console.log(_shema);
     _shema.__owner_uid = {
         type: String,
         unique: false,
         required: false
     },
-    console.log(_shema);
     _shema = _shema as SchemaDefinition;
     console.log(_shema);
     var resource_model = new MongoModel(title, _shema, timestamps);
@@ -129,17 +127,17 @@ export async function add_resource
 
             switch(action) {
                 case 'FINDALL': case 'FINDONE':
-                    permission = get_perm_id;
+                    permission = `to_get_${title}`;
                     break;
                 case 'CREATE':
-                    permission = create_perm_id;
+                    permission = `to_create_${title}`;
                     break;
                 case 'UPDATE':
-                    permission = update_perm_id;
+                    permission = `to_update_${title}`;
                     must_be_owner = true;
                     break;
                 case 'DELETE':
-                    permission = delete_perm_id;
+                    permission = `to_delete_${title}`;
                     must_be_owner = true;
                     break;
             }
@@ -148,7 +146,12 @@ export async function add_resource
                 let resource_instance = await resource_model.model.findById(instance_id);
                 owner_id = resource_instance.__owner_uid;
             }
+            console.log("1");
             var resp = await check_permission(identity_url, token, permission);
+            console.log("2");
+            console.log(instance_id);
+            console.log(owner_id);
+            console.log(resp);
             if(resp.status == 200) {
                 if(must_be_owner) {
                     if(owner_id) {

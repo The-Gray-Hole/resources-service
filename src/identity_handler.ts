@@ -159,6 +159,7 @@ export async function check_permission
     if(permission == "" || !token) {
         return false;
     }
+    console.log("1.1");
 
     let resp = await axios({
         method: 'post',
@@ -166,5 +167,6 @@ export async function check_permission
         headers: {'access-token': token},
         data: {permission: permission}
     });
+    console.log("1.2");
     return resp;
 }
