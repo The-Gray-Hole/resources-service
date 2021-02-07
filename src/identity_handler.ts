@@ -94,6 +94,61 @@ export async function create_role
     return true;
 }
 
+export async function get_users
+(
+    identity_url: string,
+    identity_token: string
+)
+{
+    let users = await axios({
+        method: 'get',
+        url: `${identity_url}/users`,
+        headers: {'access-token': identity_token}
+    });
+    if(users.status >= 300 || users.status < 200) {
+        return null;
+    }
+    return users.data;
+}
+
+export async function create_user
+(
+    identity_url: string,
+    identity_token: string,
+    username: string,
+    email: string,
+    password: string,
+    roles: Array<string>,
+)
+{
+    let users = await get_users(identity_url, identity_token);
+    if(!users) return null;
+    let usernames = users.map(function(user: any) {
+        return user.username;
+    });
+    let emails = users.map(function(user: any) {
+        return user.email;
+    });
+
+    if(!usernames.includes(username) && !emails.includes(email)) {
+        let resp = await axios({
+            method: 'post',
+            url: `${identity_url}/users`,
+            headers: {'access-token': identity_token},
+            data: {
+                username: username,
+                email: email,
+                password: password,
+                roles: roles
+            }
+        });
+        if(resp.status >= 300 || resp.status < 200) {
+            return null;
+        }
+    }
+    return true;
+}
+
 export async function check_permission
 (
     identity_url: string,

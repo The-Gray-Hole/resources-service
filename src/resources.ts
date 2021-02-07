@@ -9,6 +9,8 @@ import {
     create_permission,
     get_roles,
     create_role,
+    get_users,
+    create_user,
     check_permission
 } from './identity_handler';
 import { add_resource, remove_resource } from './instances';
@@ -38,11 +40,17 @@ export class ResourcesService {
     private _resources_ctl: MongoController;
     private _resources_auth: Auth | null = null;
     private _resources_router: MongoRouter | null = null;
+    private _admin_username: string;
+    private _admin_email: string;
+    private _admin_password: string;
 
     constructor(identity_url: string,
                 identity_token: string,
                 db_url: string,
                 cors_white_list: Array<string>,
+                admin_username: string,
+                admin_email: string,
+                admin_password: string,
                 port?: Number,
                 app_name?: string) {
 
@@ -50,6 +58,10 @@ export class ResourcesService {
         this._identity_token = identity_token; 
         this._app_name = app_name || "My Resource API";
         this._port = port || 8000;
+
+        this._admin_username = admin_username;
+        this._admin_email = admin_email;
+        this._admin_password = admin_password;
 
         this._resources_model = new MongoModel(
             "_resource",
@@ -135,6 +147,20 @@ export class ResourcesService {
             [resources_admin_perm]
         );
         if(!created) return null;
+
+        let roles = await get_roles(this._identity_url, this._identity_token);
+        let resources_admin_role = roles.filter(function(role: any) {
+            return role.title == RESOURCES_ADMIN_ROLE;
+        })[0]._id;
+
+        create_user(
+            this._identity_url,
+            this._identity_token,
+            this._admin_username,
+            this._admin_email,
+            this._admin_password,
+            [resources_admin_role]
+        )
 
         this._resources_auth = new Auth(
             this._resources_model,
