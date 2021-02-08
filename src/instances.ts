@@ -146,12 +146,7 @@ export async function add_resource
                 let resource_instance = await resource_model.model.findById(instance_id);
                 owner_id = resource_instance.__owner_uid;
             }
-            console.log("1");
             var resp = await check_permission(identity_url, token, permission);
-            console.log("2");
-            console.log(instance_id);
-            console.log(owner_id);
-            console.log(resp);
             if(resp.status == 200) {
                 if(must_be_owner) {
                     if(owner_id) {
