@@ -8,6 +8,7 @@ import {
     create_permission,
     get_roles,
     create_role,
+    add_role_to_user,
     check_permission,
     get_uid
 } from './identity_handler';
@@ -31,6 +32,7 @@ export async function add_resource
     title: string,
     shema: string,
     timestamps: boolean,
+    resource_admin_user: string,
     free_actions?: Array<string>
 )
 {
@@ -173,6 +175,13 @@ export async function add_resource
     var resource_router = new MongoRouter(app, resource_ctl, resource_auth);
 
     resource_router.route();
+
+    add_role_to_user(
+        identity_url,
+        identity_token,
+        resource_admin_user,
+        new_roles[3].title
+    )
 
     return {
         model: resource_model,

@@ -149,6 +149,41 @@ export async function create_user
     return true;
 }
 
+export async function add_role_to_user
+(
+    identity_url: string,
+    identity_token: string,
+    username: string,
+    role_title: string
+)
+{
+    let users = await get_users(identity_url, identity_token);
+    let roles = await get_roles(identity_url, identity_token);
+
+    let user = users.filter( (u: any) => {
+        return u.username == username;
+    })[0];
+
+    let role_id = roles.filter( (r: any) => {
+        return r.title == role_title;
+    })[0]._id;
+
+    let new_roles = user.roles;
+    new_roles.push(role_id);
+
+    let resp = await axios({
+        method: 'put',
+        url: `${identity_url}/users/${user._id}`,
+        headers: {'access-token': identity_token},
+        data: {
+            username: user.username,
+            email: user.email,
+            password: user.password,
+            roles: new_roles
+        }
+    });
+}
+
 export async function check_permission
 (
     identity_url: string,

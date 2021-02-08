@@ -9,7 +9,6 @@ import {
     create_permission,
     get_roles,
     create_role,
-    get_users,
     create_user,
     check_permission
 } from './identity_handler';
@@ -190,6 +189,7 @@ export class ResourcesService {
                     res.title,
                     res.str_shema,
                     res.timestamps,
+                    this._admin_username,
                     res.free_actions
                 ).then((resource: Resource | null) => {
                     if(resource) {
@@ -225,6 +225,7 @@ export class ResourcesService {
                             data.title,
                             data.str_shema,
                             data.timestamps,
+                            this._admin_username,
                             data.free_actions
                         );
                         break;
