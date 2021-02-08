@@ -8,7 +8,8 @@ import {
     create_permission,
     get_roles,
     create_role,
-    check_permission
+    check_permission,
+    get_uid
 } from './identity_handler';
 import { Resource } from './resources';
 
@@ -35,9 +36,9 @@ export async function add_resource
 {
     var _shema = JSON.parse(shema);
     _shema.__owner_uid = {
-        type: String,
+        type: "String",
         unique: false,
-        required: false
+        required: true
     },
     _shema = _shema as SchemaDefinition;
     console.log(_shema);
@@ -47,8 +48,10 @@ export async function add_resource
     var new_permissions = [
         `to_get_${title}`,
         `to_create_${title}`,
-        `to_update_${title}`,
-        `to_delete_${title}`,
+        `to_update_my_${title}`,
+        `to_delete_my_${title}`,
+        `to_update_any_${title}`,
+        `to_delete_any_${title}`
     ]
 
     for(let i = 0; i < new_permissions.length; i++) {
@@ -64,8 +67,10 @@ export async function add_resource
 
     var get_perm_id = "";
     var create_perm_id = "";
-    var update_perm_id = "";
-    var delete_perm_id = "";
+    var update_my_perm_id = "";
+    var delete_my_perm_id = "";
+    var update_any_perm_id = "";
+    var delete_any_perm_id = "";
 
     for(let i = 0; i < permissions.length; i++) {
         if(permissions[i].title == new_permissions[0]) {
@@ -75,10 +80,16 @@ export async function add_resource
             create_perm_id = permissions[i]._id;
         }
         if(permissions[i].title == new_permissions[2]) {
-            update_perm_id = permissions[i]._id;
+            update_my_perm_id = permissions[i]._id;
         }
         if(permissions[i].title == new_permissions[3]) {
-            delete_perm_id = permissions[i]._id;
+            delete_my_perm_id = permissions[i]._id;
+        }
+        if(permissions[i].title == new_permissions[4]) {
+            update_any_perm_id = permissions[i]._id;
+        }
+        if(permissions[i].title == new_permissions[5]) {
+            delete_any_perm_id = permissions[i]._id;
         }
     }
 
@@ -93,17 +104,27 @@ export async function add_resource
             title: `${title}_writer`,
             permissions: [
                 get_perm_id,
-                create_perm_id,
-                update_perm_id
+                create_perm_id
             ]
         },
         {
-            title: `${title}_manager`,
+            title: `${title}_owned_manager`,
             permissions: [
                 get_perm_id,
                 create_perm_id,
-                update_perm_id,
-                delete_perm_id
+                update_my_perm_id,
+                delete_my_perm_id
+            ]
+        },
+        {
+            title: `${title}_full_manager`,
+            permissions: [
+                get_perm_id,
+                create_perm_id,
+                update_my_perm_id,
+                delete_my_perm_id,
+                update_any_perm_id,
+                delete_any_perm_id
             ]
         }
     ]
@@ -124,6 +145,12 @@ export async function add_resource
             var permission = "";
             var must_be_owner = false;
             var owner_id = null;
+            var token_uid = await get_uid(identity_url, token);
+            if(instance_id) {
+                let resource_instance = await resource_model.model.findById(instance_id);
+                owner_id = resource_instance.__owner_uid;
+            }
+            let is_owner = (owner_id == token_uid);
 
             switch(action) {
                 case 'FINDALL': case 'FINDONE':
@@ -133,32 +160,16 @@ export async function add_resource
                     permission = `to_create_${title}`;
                     break;
                 case 'UPDATE':
-                    permission = `to_update_${title}`;
-                    must_be_owner = true;
+                    permission = `to_update_${is_owner ? "my" : "any"}_${title}`;
                     break;
                 case 'DELETE':
-                    permission = `to_delete_${title}`;
+                    permission = `to_delete_${is_owner ? "my" : "any"}_${title}`;
                     must_be_owner = true;
                     break;
             }
 
-            if(instance_id) {
-                let resource_instance = await resource_model.model.findById(instance_id);
-                owner_id = resource_instance.__owner_uid;
-            }
             var resp = await check_permission(identity_url, token, permission);
-            if(resp.status == 200) {
-                if(must_be_owner) {
-                    if(owner_id) {
-                        return owner_id == resp.data.data.uid;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return true;
-                }
-            }
-            return false;
+            return resp.status == 200;
         },
         free_actions || []
     );

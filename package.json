@@ -1,6 +1,6 @@
 {
   "name": "resources-service",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "Service for resources management.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

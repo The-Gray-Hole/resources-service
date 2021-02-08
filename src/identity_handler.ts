@@ -168,3 +168,18 @@ export async function check_permission
     });
     return resp;
 }
+
+export async function get_uid
+(
+    identity_url: string,
+    token: string
+)
+{
+    let resp = await axios({
+        method: 'post',
+        url: `${identity_url}/get_uid`,
+        headers: {'access-token': token},
+        data: {}
+    });
+    return resp.data.uid;
+}
