@@ -149,8 +149,6 @@ export async function add_resource
                 owner_id = resource_instance.__owner_uid;
             }
             let is_owner = (owner_id == token_uid);
-            console.log(is_owner);
-            console.log(action);
 
             switch(action) {
                 case 'FINDALL': case 'FINDONE':
@@ -166,11 +164,8 @@ export async function add_resource
                     permission = `to_delete_${is_owner ? "my" : "any"}_${title}`;
                     break;
             }
-            console.log(permission);
-            console.log(token);
 
             var resp = await check_permission(identity_url, token, permission);
-            console.log(resp.data);
             return resp.status == 200;
         },
         free_actions || []
