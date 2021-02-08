@@ -176,12 +176,13 @@ export async function add_role_to_user
         url: `${identity_url}/users/${user._id}`,
         headers: {'access-token': identity_token},
         data: {
-            username: user.username,
-            email: user.email,
-            password: user.password,
             roles: new_roles
         }
     });
+    if(resp.status >= 300 || resp.status < 200) {
+        return null;
+    }
+    return true;
 }
 
 export async function check_permission
