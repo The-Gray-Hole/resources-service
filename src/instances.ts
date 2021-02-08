@@ -41,7 +41,6 @@ export async function add_resource
         required: true
     },
     _shema = _shema as SchemaDefinition;
-    console.log(_shema);
     var resource_model = new MongoModel(title, _shema, timestamps);
     var resource_ctl = new MongoController(resource_model, valid_actions);
 
@@ -143,7 +142,6 @@ export async function add_resource
         resource_model,
         async function(token: string, action: string, instance_id: string) {
             var permission = "";
-            var must_be_owner = false;
             var owner_id = null;
             var token_uid = await get_uid(identity_url, token);
             if(instance_id) {
@@ -151,6 +149,8 @@ export async function add_resource
                 owner_id = resource_instance.__owner_uid;
             }
             let is_owner = (owner_id == token_uid);
+            console.log(is_owner);
+            console.log(action);
 
             switch(action) {
                 case 'FINDALL': case 'FINDONE':
@@ -164,11 +164,13 @@ export async function add_resource
                     break;
                 case 'DELETE':
                     permission = `to_delete_${is_owner ? "my" : "any"}_${title}`;
-                    must_be_owner = true;
                     break;
             }
+            console.log(permission);
+            console.log(token);
 
             var resp = await check_permission(identity_url, token, permission);
+            console.log(resp.data);
             return resp.status == 200;
         },
         free_actions || []
