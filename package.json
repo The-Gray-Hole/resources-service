@@ -41,6 +41,6 @@
   "dependencies": {
     "axios": "^0.21.1",
     "cors": "^2.8.5",
-    "rest-mongoose": "^2.3.0"
+    "rest-mongoose": "^2.3.3"
   }
 }

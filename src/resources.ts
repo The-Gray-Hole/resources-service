@@ -12,7 +12,7 @@ import {
     create_user,
     check_permission
 } from './identity_handler';
-import { add_resource, remove_resource } from './instances';
+import { add_resource } from './instances';
 
 var axios = require('axios').default;
 var cors = require('cors');
@@ -91,7 +91,7 @@ export class ResourcesService {
 
         this._resources_ctl = new MongoController(
             this._resources_model,
-            ["CREATE", "FINDALL", "FINDONE", "DELETE"]
+            ["CREATE", "FINDALL", "FINDONE"]
         );
 
         var corsOptions = {
@@ -229,8 +229,8 @@ export class ResourcesService {
                             data.free_actions
                         );
                         break;
-                    case "DELETE":
-                        remove_resource(data.title, this._resources, this._app);
+                    // case "DELETE":
+                    //     remove_resource(data.title, this._resources, this._app);
                 }
             });
         } else {

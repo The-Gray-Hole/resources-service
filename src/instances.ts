@@ -191,26 +191,25 @@ export async function add_resource
     };
 }
 
-export async function remove_resource
-(
-    title: string,
-    resources: Array<Resource>,
-    app: App
-)
-{
-    if(title == "_resource") return false;
+// export async function remove_resource
+// (
+//     title: string,
+//     resources: Array<Resource>,
+//     app: App
+// )
+// {
+//     if(title == "_resource") return false;
 
-    for(let res of resources) {
-        if(res.model.name == title) {
-            res.model.model.deleteMany({}, function(err: any) {
-                if(err) {
-                    console.log(`Error deleting ${res.model.name}s: ${err}`);
-                }
-            });
-        }
-        var routes = app._router.stack;
-        console.log(routes);
-    }
+//     for(let res of resources) {
+//         if(res.model.name == title) {
+//             res.model.model.deleteMany({}, function(err: any) {
+//                 if(err) {
+//                     console.log(`Error deleting ${res.model.name}s: ${err}`);
+//                 }
+//             });
+//         }
+//         var routes = app._router.stack;
+//     }
 
-    return true;
-}
+//     return true;
+// }
